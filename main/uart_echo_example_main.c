@@ -42,17 +42,17 @@ static const char *TAG = "UART TEST";
 #define BUF_SIZE (1024)
 
 typedef enum {
-    CLI_SERVICE_RESET,                
-    CLI_SERVICE_READ,           
+    CLI_SERVICE_READ,
+    CLI_SERVICE_RESET,                          
     CLI_SERVICE_WRITE,        
     CLI_SERVICE_CONTROL,               
     CLI_SERVICE_ROUTINE,
     CLI_SERVICE_NULL 
 } CLI_cmd_service;
 
-char *const CLI_cmd_service_names[] = {
-    "RESET",                
+static const char *const CLI_cmd_service_names[] = {             
     "READ",
+    "RESET",
     "WRITE",
     "CONTROL",
     "ROUTINE"
@@ -66,7 +66,7 @@ typedef enum {
     CLI_SERVICE_OPT1_NULL
 } CLI_cmd_service_opt1;
 
-char *const CLI_cmd_service_opt1_names[] = {
+static const char *const CLI_cmd_service_opt1_names[] = {
     "HARD",                
     "SOFT",
     "START",
@@ -81,7 +81,7 @@ typedef enum {
     CLI_SERVICE_OPT2_NULL
 } CLI_cmd_service_opt2;
 
-char *const CLI_cmd_service_opt2_names[] = {
+static const char *const CLI_cmd_service_opt2_names[] = {
     "NO_RESP",                
     "RESP",
     "SET",
@@ -254,21 +254,27 @@ const char *const CLI_cmd_param_names[] = {
 };
 
 typedef enum {
+    CLI_RESP_BAD_CMD_RESPONSE,
     CLI_RESP_ERR_COMMAND_INCORRECT,
     CLI_RESP_ERR_SERVICE_INCORRECT,
     CLI_RESP_ERR_VALUE_OUT_OF_RANGE,
     CLI_RESP_ERR_WRITE_NOT_PERMIT,
     CLI_RESP_ERR_COMMON_ERROR,
     CLI_RESP_ERR_INCORRECT_VALUE_TYPE,
+    CLI_RESP_ERR_RESET_CMD_INCORRECT,
+    CLI_RESP_ERR_TIMEOUT,
 } CLI_resp_err;
 
 static const char *const CLI_resp_err_names[] = {
+    "BAD_CMD_RESPONSE",
     "COMMAND_INCORRECT",
     "SERVICE_INCORRECT",
     "VALUE_OUT_OF_RANGE",
     "WRITE_NOT_PERMIT",
     "COMMON_ERROR",
-    "INCORRECT_VALUE_TYPE"
+    "INCORRECT_VALUE_TYPE",
+    "RESET_CMD_INCORRECT",
+    "TIMEOUT"
 }; 
 
 typedef struct {
@@ -295,18 +301,18 @@ typedef struct {
 
 QueueHandle_t CLI_cmd_queue = NULL;
 QueueHandle_t CLI_cmd_response_queue = NULL;
+int service_number;
+int service_opt1_number;
+int service_opt2_number;
+int param_number;
 
+void service_cmd_reset(CLI_cmd_service_opt1 reset_method, CLI_cmd_service_opt2 optional_params);
 
 void CLI_cmd_listener_task(){
     // Configure a temporary buffer for the incoming data
     uint8_t *data = (uint8_t *) malloc(BUF_SIZE);
     CLI_cmd_t cli_cmd = {CLI_SERVICE_NULL,CLI_SERVICE_OPT1_NULL,CLI_SERVICE_OPT2_NULL,CLI_PARAM_NULL};
     CLI_cmd_response_t cli_cmd_response = {CLI_SERVICE_NULL,CLI_SERVICE_OPT1_NULL,CLI_SERVICE_OPT2_NULL,CLI_PARAM_NULL};
-
-    int service_number = sizeof(CLI_cmd_service_names)/sizeof(CLI_cmd_service_names[0]);
-    int service_opt1_number = sizeof(CLI_cmd_service_opt1_names)/sizeof(CLI_cmd_service_opt1_names[0]);
-    int service_opt2_number = sizeof(CLI_cmd_service_opt2_names)/sizeof(CLI_cmd_service_opt2_names[0]);
-    int param_number = sizeof(CLI_cmd_param_names)/sizeof(CLI_cmd_param_names[0]);
 
     bool BAD_INPUT = false;
 
@@ -327,34 +333,60 @@ void CLI_cmd_listener_task(){
                 cli_cmd_response.resp_err = CLI_RESP_ERR_COMMAND_INCORRECT;
             } else {
                 
-                int i,j,k,m;
+                int i,j,k;
+                
+                //LOOKUP FOR SERVICES
                 for(i=0; i<service_number;i++){
                     if (strstr((char *) data, CLI_cmd_service_names[i]) != NULL) {
                         cli_cmd.service = i;
                         switch (cli_cmd.service){
+                            //--------------------
+                            //RESET SERVICE
+                            //--------------------
                             case CLI_SERVICE_RESET:
-                                for(j=0; i<service_opt1_number;i++){
+                                //method chosed here: HARD or SOFT
+                                for(j=0; j<service_opt1_number;j++){
                                     if (strstr((char *) data, CLI_cmd_service_opt1_names[j]) != NULL) {
+                                        printf(CLI_cmd_service_opt1_names[j]);
                                         cli_cmd.service_opt1 = j;
-                                        for(k=0; i<service_opt2_number;i++){
+                                        //searching for additional parameters  here: RESP or NO_RESP  (if no additional params: apply RESP)
+                                        for(k=0; k<service_opt2_number;k++){
                                             if (strstr((char *) data, CLI_cmd_service_opt2_names[k]) != NULL) {
                                                 cli_cmd.service_opt2 = k;
+                                                goto exit;
                                                 break;
                                             }
                                         }
+                                        cli_cmd.service_opt2 = CLI_SERVICE_OPT2_RESP;
+                                        goto exit;
                                     }
                                 }
+                                //RESET SERVICE WITH INCORRECT PARAMETERS
                                 BAD_INPUT = true;
-                                cli_cmd_response.service = CLI_SERVICE_NULL;
-                                cli_cmd_response.resp_err = CLI_RESP_ERR_SERVICE_INCORRECT; 
+                                cli_cmd_response.service = CLI_SERVICE_RESET;
+                                cli_cmd_response.resp_status = CLI_RESP_STATUS_NOK;
+                                cli_cmd_response.resp_err = CLI_RESP_ERR_RESET_CMD_INCORRECT; 
                                 goto exit;
                                 break;
+                            //--------------------
+                            //READ SERVICE
+                            //--------------------
                             case CLI_SERVICE_READ:
+
                                 break;
+                            //--------------------
+                            //WRITE SERVICE
+                            //--------------------
                             case CLI_SERVICE_WRITE:
                                 break;
+                            //--------------------
+                            //CONTROL SERVICE
+                            //--------------------
                             case CLI_SERVICE_CONTROL:
                                 break;
+                            //--------------------
+                            //ROUTINE SERVICE
+                            //--------------------
                             case CLI_SERVICE_ROUTINE:
                                 break;
                             default:
@@ -364,6 +396,7 @@ void CLI_cmd_listener_task(){
                     }
 
                 }
+                //NO SERVICES FOUND
                 BAD_INPUT = true;
                 cli_cmd_response.service = CLI_SERVICE_NULL;
                 cli_cmd_response.resp_err = CLI_RESP_ERR_SERVICE_INCORRECT;   
@@ -371,8 +404,10 @@ void CLI_cmd_listener_task(){
 
             exit:
                 if(!BAD_INPUT){
+                    //COMMAND IS CORRECT
                     xQueueSend(CLI_cmd_queue, &cli_cmd, portMAX_DELAY);
                 } else {
+                    //COMMAND IS NOT CORRECT
                     xQueueSend(CLI_cmd_response_queue, &cli_cmd_response, portMAX_DELAY);
                 }
         }
@@ -385,6 +420,9 @@ void CLI_cmd_execute_task(){
     for(;;){
         xQueueReceive(CLI_cmd_queue, &cli_cmd, portMAX_DELAY);
         switch(cli_cmd.service){
+            case CLI_SERVICE_RESET:
+                service_cmd_reset(cli_cmd.service_opt1, cli_cmd.service_opt2);
+                break;
             case CLI_SERVICE_READ:
                 uart_write_bytes(ECHO_UART_PORT_NUM, CLI_cmd_service_names[cli_cmd.service], strlen(CLI_cmd_service_names[cli_cmd.service]));
                 break;
@@ -398,23 +436,30 @@ void CLI_cmd_execute_task(){
 
 void CLI_cmd_response_task(){
     CLI_cmd_response_t cli_cmd_response;
-    
+    char *data = (char *) malloc(BUF_SIZE);
+
     for(;;){
         xQueueReceive(CLI_cmd_response_queue, &cli_cmd_response, portMAX_DELAY);
         switch(cli_cmd_response.service){
+            case CLI_SERVICE_RESET:
+                if(cli_cmd_response.resp_status==CLI_RESP_STATUS_OK){
+                    sprintf(data,"%s OK",CLI_cmd_service_names[cli_cmd_response.service]);
+                } else {
+                    sprintf(data,"%s NOK %s",CLI_cmd_service_names[cli_cmd_response.service],CLI_resp_err_names[cli_cmd_response.resp_err]);
+                }
+                break;
             case CLI_SERVICE_READ:
                 break;
             default:
-                uart_write_bytes(ECHO_UART_PORT_NUM, CLI_resp_err_names[cli_cmd_response.resp_err], strlen(CLI_resp_err_names[cli_cmd_response.resp_err]));
+                sprintf(data,CLI_resp_err_names[0]);
                 break;
-        }	
+        }
+
+        uart_write_bytes(ECHO_UART_PORT_NUM, data, strlen(data));	
     }
 }
 
 void CLI_init(){
-
-    
-
     uart_config_t uart_config = {
         .baud_rate = ECHO_UART_BAUD_RATE,
         .data_bits = UART_DATA_8_BITS,
@@ -434,6 +479,11 @@ void CLI_init(){
     if(!CLI_cmd_response_queue)
 		CLI_cmd_response_queue = xQueueCreate(1, sizeof(CLI_cmd_response_t));
 
+    service_number = sizeof(CLI_cmd_service_names)/sizeof(CLI_cmd_service_names[0]);
+    service_opt1_number = sizeof(CLI_cmd_service_opt1_names)/sizeof(CLI_cmd_service_opt1_names[0]);
+    service_opt2_number = sizeof(CLI_cmd_service_opt2_names)/sizeof(CLI_cmd_service_opt2_names[0]);
+    param_number = sizeof(CLI_cmd_param_names)/sizeof(CLI_cmd_param_names[0]);
+    
     if(CLI_cmd_queue&&CLI_cmd_response_queue){
         xTaskCreate(CLI_cmd_listener_task, "CLI_cmd_listener_task", 1024*3, NULL, 5, NULL);
         xTaskCreate(CLI_cmd_execute_task, "CLI_cmd_execute_task", 1024*2, NULL, 5, NULL);
@@ -443,7 +493,21 @@ void CLI_init(){
 
 void app_main(void)
 {
-    printf("size=%d\r\n", (sizeof(CLI_cmd_service_names) / sizeof(CLI_cmd_service_names[0])));
-    vTaskDelay(1000/portTICK_PERIOD_MS);
     CLI_init();
 }
+
+void service_cmd_reset(CLI_cmd_service_opt1 reset_method, CLI_cmd_service_opt2 optional_params) {
+    CLI_cmd_response_t cli_cmd_response;
+    cli_cmd_response.service = CLI_SERVICE_RESET;
+    cli_cmd_response.service_opt1 = reset_method;
+    cli_cmd_response.service_opt2 = optional_params;
+    cli_cmd_response.resp_status = CLI_RESP_STATUS_NOK;
+    cli_cmd_response.resp_err = CLI_RESP_BAD_CMD_RESPONSE;
+
+    //RESET COMMAND EXECUTE
+    if(true){
+        cli_cmd_response.resp_status = CLI_RESP_STATUS_OK;
+    }
+    
+    xQueueSend(CLI_cmd_response_queue, &cli_cmd_response, portMAX_DELAY);
+};
