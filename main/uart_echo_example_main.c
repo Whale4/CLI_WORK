@@ -368,27 +368,32 @@ void CLI_cmd_listener_task(){
                                 cli_cmd_response.resp_err = CLI_RESP_ERR_RESET_CMD_INCORRECT; 
                                 goto exit;
                                 break;
+
                             //--------------------
                             //READ SERVICE
                             //--------------------
                             case CLI_SERVICE_READ:
 
                                 break;
+
                             //--------------------
                             //WRITE SERVICE
                             //--------------------
                             case CLI_SERVICE_WRITE:
                                 break;
+
                             //--------------------
                             //CONTROL SERVICE
                             //--------------------
                             case CLI_SERVICE_CONTROL:
                                 break;
+
                             //--------------------
                             //ROUTINE SERVICE
                             //--------------------
                             case CLI_SERVICE_ROUTINE:
                                 break;
+                                
                             default:
                                 break;
                             }
