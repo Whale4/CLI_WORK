@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "name": "ESP-IDF",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x86",
+            "compilerPath": "C:\\esp\\.espressif\\tools\\xtensa-esp32-elf\\esp-12.2.0_20230208\\xtensa-esp32-elf\\bin\\xtensa-esp32-elf-gcc.exe",
+            "includePath": [
+                "${config:idf.espIdfPathWin}/components/**",
+                "C:/esp/esp-idf/components/**",
+                "${workspaceFolder}/**",
+                "C:/esp/esp-idf/examples/system/console/advanced/components/cmd_system",
+                "${workspaceFolder}/build/config"
+            ],
+            "browse": {
+                "path": [
+                    "${config:idf.espIdfPathWin}/components",
+                    "${config:idf.espAdfPathWin}/components/**",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": false
+            },
+            "mergeConfigurations": false,
+            "configurationProvider": "ms-vscode.cmake-tools",
+            "cStandard": "c17"
+        }
+    ],
+    "version": 4
+}

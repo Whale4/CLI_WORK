@@ -1,0 +1,31 @@
+{
+    "idf.adapterTargetName": "esp32",
+    "files.associations": {
+        "work_app.h": "c",
+        "bb_config.h": "c",
+        "bb_bsp_modem.h": "c",
+        "bb_macroses.h": "c",
+        "string.h": "c",
+        "bb_types.h": "c",
+        "pinout_settings.h": "c",
+        "bsp_gnss.h": "c",
+        "bsp_modem.h": "c",
+        "trace.h": "c",
+        "utils.h": "c",
+        "transport.h": "c",
+        "stdarg.h": "c",
+        "cli.h": "c",
+        "cstdio": "c",
+        "*.tcc": "c",
+        "datatypes.h": "c",
+        "bsp_can.h": "c",
+        "freertos.h": "c",
+        "task.h": "c",
+        "cstring": "c"
+    },
+    "idf.portWin": "COM11",
+    "idf.flashType": "UART",
+    "idf.openOcdConfigs": [
+        "board/esp32-wrover-kit-3.3v.cfg"
+    ]
+}
