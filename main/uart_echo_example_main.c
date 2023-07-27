@@ -41,14 +41,6 @@ static const char *TAG = "UART TEST";
 
 #define BUF_SIZE (1024)
 
-typedef enum {
-    CLI_SERVICE_READ,
-    CLI_SERVICE_RESET,                          
-    CLI_SERVICE_WRITE,        
-    CLI_SERVICE_CONTROL,               
-    CLI_SERVICE_ROUTINE,
-    CLI_SERVICE_NULL 
-} CLI_cmd_service;
 
 static const char *const CLI_cmd_service_names[] = {             
     "READ",
@@ -58,28 +50,12 @@ static const char *const CLI_cmd_service_names[] = {
     "ROUTINE"
 };
 
-typedef enum {
-    CLI_SERVICE_OPT1_HARD,                
-    CLI_SERVICE_OPT1_SOFT,
-    CLI_SERVICE_OPT1_START,
-    CLI_SERVICE_OPT1_RESULT,
-    CLI_SERVICE_OPT1_NULL
-} CLI_cmd_service_opt1;
-
 static const char *const CLI_cmd_service_opt1_names[] = {
     "HARD",                
     "SOFT",
     "START",
     "RESULT"
 }; 
-
-typedef enum {
-    CLI_SERVICE_OPT2_NO_RESP,                
-    CLI_SERVICE_OPT2_RESP,
-    CLI_SERVICE_OPT2_SET,
-    CLI_SERVICE_OPT2_RETURN,
-    CLI_SERVICE_OPT2_NULL
-} CLI_cmd_service_opt2;
 
 static const char *const CLI_cmd_service_opt2_names[] = {
     "NO_RESP",                
@@ -88,95 +64,12 @@ static const char *const CLI_cmd_service_opt2_names[] = {
     "RETURN"
 };
 
-typedef enum {
-    CLI_RESP_STATUS_NOK,                
-    CLI_RESP_STATUS_OK
-} CLI_resp_status;
-
 char *const CLI_resp_status_names[] = {
     "NOK",
     "OK"
 }; 
 
-typedef enum {
-    CLI_PARAM_RADIO_MUTE_DELAY,
-    CLI_PARAM_RADIO_UNMUTE_DELAY,
-    CLI_PARAM_CALL_AUTO_ANSWER_TIME,
-    CLI_PARAM_POST_TEST_REGISTRATION_TIME,
-    CLI_PARAM_TEST_MODE_END_DISTANCE,
-    CLI_PARAM_GARAGE_MODE_END_DISTANCE,
-    CLI_PARAM_ECALL_TEST_NUMBER,
-    CLI_PARAM_GARAGE_MODE_PIN,
-    CLI_PARAM_INT_MEM_TRANSMIT_INTERVAL,
-    CLI_PARAM_INT_MEM_TRANSMIT_ATTEMPTS,
-    CLI_PARAM_CRASH_SIGNAL_INTERNAL,
-    CLI_PARAM_CRASH_SIGNAL_EXTERNAL,
-    CLI_PARAM_ASI15_TRESHOLD,
-    CLI_PARAM_ECALL_MODE_PIN,
-    CLI_PARAM_SOS_BUTTON_TIME,
-    CLI_PARAM_CCFT,
-    CLI_PARAM_MSD_MAX_TRANSMISSION_TIME,
-    CLI_PARAM_NAD_DEREGISTRATION_TIME,
-    CLI_PARAM_ECALL_NO_AUTOMATIC_TRIGGERING,
-    CLI_PARAM_ECALL_DIAL_DURATION,
-    CLI_PARAM_ECALL_AUTO_DIAL_ATTEMPTS,
-    CLI_PARAM_ECALL_MANUAL_DIAL_ATTEMPTS,
-    CLI_PARAM_ECALL_MANUAL_CAN_CANCEL,
-    CLI_PARAM_ECALL_SMS_FALLBACK_NUMBER,
-    CLI_PARAM_TEST_REGISTRATION_PERIOD,
-    CLI_PARAM_IGNITION_OFF_FOLLOW_UP_TIME1,
-    CLI_PARAM_IGNITION_OFF_FOLLOW_UP_TIME2,
-    CLI_PARAM_CRASH_RECORD_TIME,
-    CLI_PARAM_CRASH_RECORD_RESOLUTION,
-    CLI_PARAM_CRASH_PRE_RECORD_TIME,
-    CLI_PARAM_CRASH_PRE_RECORD_RESOLUTION,
-    CLI_PARAM_GNSS_POWER_OFF_TIME,
-    CLI_PARAM_GNSS_DATA_RATE,
-    CLI_PARAM_GNSS_MIN_ELEVATION,
-    CLI_PARAM_VIN,
-    CLI_PARAM_VEHICLE_TYPE,
-    CLI_PARAM_VEHICLE_PROPULSION_STORAGE_TYPE,
-    CLI_PARAM_ICCID_ECALL,
-    CLI_PARAM_IMEI_ECALL,
-    CLI_PARAM_ESN,
-    CLI_PARAM_GNSS_FIX,
-    CLI_PARAM_GSM_REG_STATUS,
-    CLI_PARAM_SOS_BUTTON_INPUT_STATUS,
-    CLI_PARAM_FUNC_BUTTON_INPUT_STATUS,
-    CLI_PARAM_IGN_INPUT_STATUS,
-    CLI_PARAM_ECALL_MODE_PIN_OUPUT_STATUS,
-    CLI_PARAM_GARAGE_MODE_PIN_OUTPUT_STATUS,
-    CLI_PARAM_SOS_INDICATOR_OUTPUT_STATUS,
-    CLI_PARAM_ECALL_EMERGENCY_DEBUG,
-    CLI_PARAM_ECALL_EMERGENCY_DEBUG_NUMBER,
-    CLI_PARAM_DEBUG_OUTPUT_ECALL,
-    CLI_PARAM_ECALL_ON,
-    CLI_PARAM_ECALL_SPEAKER_VOLUME,
-    CLI_PARAM_ECALL_MICROPHONE_LEVEL,
-    CLI_PARAM_FOTA_STATUS,
-    CLI_PARAM_CRASH_TURNOVER_THRESHOLD,
-    CLI_PARAM_CRASH_TURNOVER_DURATION,
-    CLI_PARAM_MOUNT_TYPE,
-    CLI_PARAM_CRASH_INPUT_PIN,
-    CLI_PARAM_NUMBER_TROUBLE_CODE,
-    CLI_PARAM_SIGNAL_STRENGTH,
-    CLI_PARAM_SUPPLY_VOLTAGE,
-    CLI_PARAM_BOOT_VERSION,
-    CLI_PARAM_CLAIBRATION_NUMBER,
-    CLI_PARAM_MODULE_NUMBER,
-    CLI_PARAM_STRATEGY_NUMBER,
-    CLI_PARAM_HARDWARE_NUMBER,
-    CLI_PARAM_MODEM_SOFTWARE_NUMBER,
-    CLI_PARAM_IMU_SOFTWARE_NUMBER,
-    CLI_PARAM_MSD_NUMBER,
-    CLI_PARAM_LAST_MSD,
-    CLI_PARAM_CURRENT_GNSS_LAT,
-    CLI_PARAM_CURRENT_GNSS_LONG,
-    CLI_PARAM_CURRENT_GNSS_TIME,
-    CLI_PARAM_NULL
-} CLI_cmd_param;
-
-const char *const CLI_cmd_param_names[] = {
+static const char *const CLI_cmd_param_names[] = {
 	"RADIO_MUTE_DELAY",
     "RADIO_UNMUTE_DELAY",
     "CALL_AUTO_ANSWER_TIME",
@@ -254,16 +147,89 @@ const char *const CLI_cmd_param_names[] = {
 };
 
 typedef enum {
-    CLI_RESP_BAD_CMD_RESPONSE,
-    CLI_RESP_ERR_COMMAND_INCORRECT,
-    CLI_RESP_ERR_SERVICE_INCORRECT,
-    CLI_RESP_ERR_VALUE_OUT_OF_RANGE,
-    CLI_RESP_ERR_WRITE_NOT_PERMIT,
-    CLI_RESP_ERR_COMMON_ERROR,
-    CLI_RESP_ERR_INCORRECT_VALUE_TYPE,
-    CLI_RESP_ERR_RESET_CMD_INCORRECT,
-    CLI_RESP_ERR_TIMEOUT,
-} CLI_resp_err;
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_FLOAT,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_BOOL
+} CLI_param_type;
+
+int CLI_param_value_type[] = {
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_BOOL,
+    CLI_PARAM_TYPE_BOOL,
+    CLI_PARAM_TYPE_FLOAT,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_BOOL,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_BOOL,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_ENUM,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_INT,
+    CLI_PARAM_TYPE_STRING,
+    CLI_PARAM_TYPE_FLOAT,
+    CLI_PARAM_TYPE_FLOAT,
+    CLI_PARAM_TYPE_INT
+};
 
 static const char *const CLI_resp_err_names[] = {
     "BAD_CMD_RESPONSE",
@@ -274,14 +240,137 @@ static const char *const CLI_resp_err_names[] = {
     "COMMON_ERROR",
     "INCORRECT_VALUE_TYPE",
     "RESET_CMD_INCORRECT",
-    "TIMEOUT"
+    "TIMEOUT",
+    "PARAMETER_NOT_EXIST"
 }; 
+
+typedef enum {
+    CLI_SERVICE_READ,
+    CLI_SERVICE_RESET,                          
+    CLI_SERVICE_WRITE,        
+    CLI_SERVICE_CONTROL,               
+    CLI_SERVICE_ROUTINE,
+    CLI_SERVICE_NULL 
+} CLI_cmd_service;
+
+typedef enum {
+    CLI_SERVICE_OPT1_HARD,                
+    CLI_SERVICE_OPT1_SOFT,
+    CLI_SERVICE_OPT1_START,
+    CLI_SERVICE_OPT1_RESULT,
+    CLI_SERVICE_OPT1_NULL
+} CLI_cmd_service_opt1;
+
+typedef enum {
+    CLI_SERVICE_OPT2_NO_RESP,                
+    CLI_SERVICE_OPT2_RESP,
+    CLI_SERVICE_OPT2_SET,
+    CLI_SERVICE_OPT2_RETURN,
+    CLI_SERVICE_OPT2_NULL
+} CLI_cmd_service_opt2;
+
+typedef enum {
+    CLI_RESP_STATUS_NOK,                
+    CLI_RESP_STATUS_OK
+} CLI_resp_status;
+
+typedef enum {
+    CLI_PARAM_RADIO_MUTE_DELAY,
+    CLI_PARAM_RADIO_UNMUTE_DELAY,
+    CLI_PARAM_CALL_AUTO_ANSWER_TIME,
+    CLI_PARAM_POST_TEST_REGISTRATION_TIME,
+    CLI_PARAM_TEST_MODE_END_DISTANCE,
+    CLI_PARAM_GARAGE_MODE_END_DISTANCE,
+    CLI_PARAM_ECALL_TEST_NUMBER,
+    CLI_PARAM_GARAGE_MODE_PIN,
+    CLI_PARAM_INT_MEM_TRANSMIT_INTERVAL,
+    CLI_PARAM_INT_MEM_TRANSMIT_ATTEMPTS,
+    CLI_PARAM_CRASH_SIGNAL_INTERNAL,
+    CLI_PARAM_CRASH_SIGNAL_EXTERNAL,
+    CLI_PARAM_ASI15_TRESHOLD,
+    CLI_PARAM_ECALL_MODE_PIN,
+    CLI_PARAM_SOS_BUTTON_TIME,
+    CLI_PARAM_CCFT,
+    CLI_PARAM_MSD_MAX_TRANSMISSION_TIME,
+    CLI_PARAM_NAD_DEREGISTRATION_TIME,
+    CLI_PARAM_ECALL_NO_AUTOMATIC_TRIGGERING,
+    CLI_PARAM_ECALL_DIAL_DURATION,
+    CLI_PARAM_ECALL_AUTO_DIAL_ATTEMPTS,
+    CLI_PARAM_ECALL_MANUAL_DIAL_ATTEMPTS,
+    CLI_PARAM_ECALL_MANUAL_CAN_CANCEL,
+    CLI_PARAM_ECALL_SMS_FALLBACK_NUMBER,
+    CLI_PARAM_TEST_REGISTRATION_PERIOD,
+    CLI_PARAM_IGNITION_OFF_FOLLOW_UP_TIME1,
+    CLI_PARAM_IGNITION_OFF_FOLLOW_UP_TIME2,
+    CLI_PARAM_CRASH_RECORD_TIME,
+    CLI_PARAM_CRASH_RECORD_RESOLUTION,
+    CLI_PARAM_CRASH_PRE_RECORD_TIME,
+    CLI_PARAM_CRASH_PRE_RECORD_RESOLUTION,
+    CLI_PARAM_GNSS_POWER_OFF_TIME,
+    CLI_PARAM_GNSS_DATA_RATE,
+    CLI_PARAM_GNSS_MIN_ELEVATION,
+    CLI_PARAM_VIN,
+    CLI_PARAM_VEHICLE_TYPE,
+    CLI_PARAM_VEHICLE_PROPULSION_STORAGE_TYPE,
+    CLI_PARAM_ICCID_ECALL,
+    CLI_PARAM_IMEI_ECALL,
+    CLI_PARAM_ESN,
+    CLI_PARAM_GNSS_FIX,
+    CLI_PARAM_GSM_REG_STATUS,
+    CLI_PARAM_SOS_BUTTON_INPUT_STATUS,
+    CLI_PARAM_FUNC_BUTTON_INPUT_STATUS,
+    CLI_PARAM_IGN_INPUT_STATUS,
+    CLI_PARAM_ECALL_MODE_PIN_OUPUT_STATUS,
+    CLI_PARAM_GARAGE_MODE_PIN_OUTPUT_STATUS,
+    CLI_PARAM_SOS_INDICATOR_OUTPUT_STATUS,
+    CLI_PARAM_ECALL_EMERGENCY_DEBUG,
+    CLI_PARAM_ECALL_EMERGENCY_DEBUG_NUMBER,
+    CLI_PARAM_DEBUG_OUTPUT_ECALL,
+    CLI_PARAM_ECALL_ON,
+    CLI_PARAM_ECALL_SPEAKER_VOLUME,
+    CLI_PARAM_ECALL_MICROPHONE_LEVEL,
+    CLI_PARAM_FOTA_STATUS,
+    CLI_PARAM_CRASH_TURNOVER_THRESHOLD,
+    CLI_PARAM_CRASH_TURNOVER_DURATION,
+    CLI_PARAM_MOUNT_TYPE,
+    CLI_PARAM_CRASH_INPUT_PIN,
+    CLI_PARAM_NUMBER_TROUBLE_CODE,
+    CLI_PARAM_SIGNAL_STRENGTH,
+    CLI_PARAM_SUPPLY_VOLTAGE,
+    CLI_PARAM_BOOT_VERSION,
+    CLI_PARAM_CLAIBRATION_NUMBER,
+    CLI_PARAM_MODULE_NUMBER,
+    CLI_PARAM_STRATEGY_NUMBER,
+    CLI_PARAM_HARDWARE_NUMBER,
+    CLI_PARAM_MODEM_SOFTWARE_NUMBER,
+    CLI_PARAM_IMU_SOFTWARE_NUMBER,
+    CLI_PARAM_MSD_NUMBER,
+    CLI_PARAM_LAST_MSD,
+    CLI_PARAM_CURRENT_GNSS_LAT,
+    CLI_PARAM_CURRENT_GNSS_LONG,
+    CLI_PARAM_CURRENT_GNSS_TIME,
+    CLI_PARAM_NULL,
+} CLI_cmd_param;
+
+typedef enum {
+    CLI_RESP_BAD_CMD_RESPONSE,
+    CLI_RESP_ERR_COMMAND_INCORRECT,
+    CLI_RESP_ERR_SERVICE_INCORRECT,
+    CLI_RESP_ERR_VALUE_OUT_OF_RANGE,
+    CLI_RESP_ERR_WRITE_NOT_PERMIT,
+    CLI_RESP_ERR_COMMON_ERROR,
+    CLI_RESP_ERR_INCORRECT_VALUE_TYPE,
+    CLI_RESP_ERR_RESET_CMD_INCORRECT,
+    CLI_RESP_ERR_TIMEOUT,
+    CLI_RESP_ERR_PARAMETER_NOT_EXIST,
+} CLI_resp_err;
 
 typedef struct {
 	CLI_cmd_service service;
     CLI_cmd_service_opt1 service_opt1;
     CLI_cmd_service_opt2 service_opt2;
     CLI_cmd_param cmd_param;
+    CLI_param_type type;
     int int_Param_value;
     char* str_Param_value;
     float f_Param_value;
@@ -294,6 +383,7 @@ typedef struct {
     CLI_cmd_param cmd_param;
     CLI_resp_status resp_status;
     CLI_resp_err resp_err;
+    CLI_param_type type; 
     int int_Param_value;
     char* str_Param_value;
     float f_Param_value;
@@ -306,7 +396,8 @@ int service_opt1_number;
 int service_opt2_number;
 int param_number;
 
-void service_cmd_reset(CLI_cmd_service_opt1 reset_method, CLI_cmd_service_opt2 optional_params);
+void cli_service_reset(CLI_cmd_service_opt1 reset_method, CLI_cmd_service_opt2 optional_params);
+void cli_service_read(CLI_cmd_param cmd_param, CLI_param_type type);
 
 void CLI_cmd_listener_task(){
     // Configure a temporary buffer for the incoming data
@@ -347,7 +438,6 @@ void CLI_cmd_listener_task(){
                                 //method chosed here: HARD or SOFT
                                 for(j=0; j<service_opt1_number;j++){
                                     if (strstr((char *) data, CLI_cmd_service_opt1_names[j]) != NULL) {
-                                        printf(CLI_cmd_service_opt1_names[j]);
                                         cli_cmd.service_opt1 = j;
                                         //searching for additional parameters  here: RESP or NO_RESP  (if no additional params: apply RESP)
                                         for(k=0; k<service_opt2_number;k++){
@@ -373,7 +463,20 @@ void CLI_cmd_listener_task(){
                             //READ SERVICE
                             //--------------------
                             case CLI_SERVICE_READ:
-
+                                //FIND PARAMETER HERE
+                                for(j=0; j<param_number;j++){
+                                    if (strstr((char *) data, CLI_cmd_param_names[j]) != NULL) {
+                                        cli_cmd.cmd_param = j;
+                                        cli_cmd.type = CLI_param_value_type[j];
+                                        goto exit;
+                                    }            
+                                }
+                                //NO SUCH PARAMETER IN DB
+                                BAD_INPUT = true;
+                                cli_cmd_response.service = CLI_SERVICE_READ;
+                                cli_cmd_response.resp_status = CLI_RESP_STATUS_NOK;
+                                cli_cmd_response.resp_err = CLI_RESP_ERR_PARAMETER_NOT_EXIST; 
+                                goto exit;    
                                 break;
 
                             //--------------------
@@ -426,18 +529,16 @@ void CLI_cmd_execute_task(){
         xQueueReceive(CLI_cmd_queue, &cli_cmd, portMAX_DELAY);
         switch(cli_cmd.service){
             case CLI_SERVICE_RESET:
-                service_cmd_reset(cli_cmd.service_opt1, cli_cmd.service_opt2);
+                cli_service_reset(cli_cmd.service_opt1, cli_cmd.service_opt2);
                 break;
             case CLI_SERVICE_READ:
-                uart_write_bytes(ECHO_UART_PORT_NUM, CLI_cmd_service_names[cli_cmd.service], strlen(CLI_cmd_service_names[cli_cmd.service]));
+                cli_service_read(cli_cmd.cmd_param, cli_cmd.type);
                 break;
             default:
-                uart_write_bytes(ECHO_UART_PORT_NUM, CLI_cmd_service_names[CLI_SERVICE_RESET], strlen(CLI_cmd_service_names[CLI_SERVICE_RESET]));
                 break;
         }		
     }
 }
-
 
 void CLI_cmd_response_task(){
     CLI_cmd_response_t cli_cmd_response;
@@ -448,12 +549,39 @@ void CLI_cmd_response_task(){
         switch(cli_cmd_response.service){
             case CLI_SERVICE_RESET:
                 if(cli_cmd_response.resp_status==CLI_RESP_STATUS_OK){
-                    sprintf(data,"%s OK",CLI_cmd_service_names[cli_cmd_response.service]);
+                    sprintf(data,"%s OK",
+                        CLI_cmd_service_names[cli_cmd_response.service]);
                 } else {
-                    sprintf(data,"%s NOK %s",CLI_cmd_service_names[cli_cmd_response.service],CLI_resp_err_names[cli_cmd_response.resp_err]);
+                    sprintf(data,"%s NOK %s",
+                        CLI_cmd_service_names[cli_cmd_response.service],
+                        CLI_resp_err_names[cli_cmd_response.resp_err]);
                 }
                 break;
             case CLI_SERVICE_READ:
+                if(cli_cmd_response.resp_status==CLI_RESP_STATUS_OK){
+                    switch (cli_cmd_response.type){
+                        case CLI_PARAM_TYPE_ENUM:
+                            break;
+                        case CLI_PARAM_TYPE_INT:
+                            sprintf(data,"%s OK %s %d",
+                            CLI_cmd_service_names[cli_cmd_response.service],
+                            CLI_cmd_param_names[cli_cmd_response.cmd_param],
+                            cli_cmd_response.int_Param_value);
+                            break;
+                        case CLI_PARAM_TYPE_FLOAT:
+                            break;
+                        case CLI_PARAM_TYPE_STRING:
+                            break;
+                        case CLI_PARAM_TYPE_BOOL:
+                            break;
+                        default:
+                            break;
+                        }
+                } else {
+                    sprintf(data,"%s NOK %s",
+                        CLI_cmd_service_names[cli_cmd_response.service],
+                        CLI_resp_err_names[cli_cmd_response.resp_err]);
+                }
                 break;
             default:
                 sprintf(data,CLI_resp_err_names[0]);
@@ -501,8 +629,9 @@ void app_main(void)
     CLI_init();
 }
 
-void service_cmd_reset(CLI_cmd_service_opt1 reset_method, CLI_cmd_service_opt2 optional_params) {
+void cli_service_reset(CLI_cmd_service_opt1 reset_method, CLI_cmd_service_opt2 optional_params) {
     CLI_cmd_response_t cli_cmd_response;
+
     cli_cmd_response.service = CLI_SERVICE_RESET;
     cli_cmd_response.service_opt1 = reset_method;
     cli_cmd_response.service_opt2 = optional_params;
@@ -514,5 +643,171 @@ void service_cmd_reset(CLI_cmd_service_opt1 reset_method, CLI_cmd_service_opt2 o
         cli_cmd_response.resp_status = CLI_RESP_STATUS_OK;
     }
     
+    xQueueSend(CLI_cmd_response_queue, &cli_cmd_response, portMAX_DELAY);
+};
+
+void cli_service_read(CLI_cmd_param cmd_param, CLI_param_type type) {
+    CLI_cmd_response_t cli_cmd_response;
+
+    cli_cmd_response.service = CLI_SERVICE_READ;
+    cli_cmd_response.cmd_param = cmd_param;
+    cli_cmd_response.type = type;
+
+    switch (cmd_param){
+        case CLI_PARAM_RADIO_MUTE_DELAY:
+            cli_cmd_response.int_Param_value = 15;
+            break;
+        case CLI_PARAM_RADIO_UNMUTE_DELAY:
+            break;
+        case CLI_PARAM_CALL_AUTO_ANSWER_TIME:
+            break;
+        case CLI_PARAM_POST_TEST_REGISTRATION_TIME:
+            break;
+        case CLI_PARAM_TEST_MODE_END_DISTANCE:
+            break;
+        case CLI_PARAM_GARAGE_MODE_END_DISTANCE:
+            break;
+        case CLI_PARAM_ECALL_TEST_NUMBER:
+            break;
+        case CLI_PARAM_GARAGE_MODE_PIN:
+            break;
+        case CLI_PARAM_INT_MEM_TRANSMIT_INTERVAL:
+            break;
+        case CLI_PARAM_INT_MEM_TRANSMIT_ATTEMPTS:
+            break;
+        case CLI_PARAM_CRASH_SIGNAL_INTERNAL:
+            break;
+        case CLI_PARAM_CRASH_SIGNAL_EXTERNAL:
+            break;
+        case CLI_PARAM_ASI15_TRESHOLD:
+            break;
+        case CLI_PARAM_ECALL_MODE_PIN:
+            break;
+        case CLI_PARAM_SOS_BUTTON_TIME:
+            break;
+        case CLI_PARAM_CCFT:
+            break;
+        case CLI_PARAM_MSD_MAX_TRANSMISSION_TIME:
+            break;
+        case CLI_PARAM_NAD_DEREGISTRATION_TIME:
+            break;
+        case CLI_PARAM_ECALL_NO_AUTOMATIC_TRIGGERING:
+            break;
+        case CLI_PARAM_ECALL_DIAL_DURATION:
+            break;
+        case CLI_PARAM_ECALL_AUTO_DIAL_ATTEMPTS:
+            break;
+        case CLI_PARAM_ECALL_MANUAL_DIAL_ATTEMPTS:
+            break;
+        case CLI_PARAM_ECALL_MANUAL_CAN_CANCEL:
+            break;
+        case CLI_PARAM_ECALL_SMS_FALLBACK_NUMBER:
+            break;
+        case CLI_PARAM_TEST_REGISTRATION_PERIOD:
+            break;
+        case CLI_PARAM_IGNITION_OFF_FOLLOW_UP_TIME1:
+            break;
+        case CLI_PARAM_IGNITION_OFF_FOLLOW_UP_TIME2:
+            break;
+        case CLI_PARAM_CRASH_RECORD_TIME:
+            break;
+        case CLI_PARAM_CRASH_RECORD_RESOLUTION:
+            break;
+        case CLI_PARAM_CRASH_PRE_RECORD_TIME:
+            break;
+        case CLI_PARAM_CRASH_PRE_RECORD_RESOLUTION:
+            break;
+        case CLI_PARAM_GNSS_POWER_OFF_TIME:
+            break;
+        case CLI_PARAM_GNSS_DATA_RATE:
+            break;
+        case CLI_PARAM_GNSS_MIN_ELEVATION:
+            break;
+        case CLI_PARAM_VIN:
+            break;
+        case CLI_PARAM_VEHICLE_TYPE:
+            break;
+        case CLI_PARAM_VEHICLE_PROPULSION_STORAGE_TYPE:
+            break;
+        case CLI_PARAM_ICCID_ECALL:
+            break;
+        case CLI_PARAM_IMEI_ECALL:
+            break;
+        case CLI_PARAM_ESN:
+            break;
+        case CLI_PARAM_GNSS_FIX:
+            break;
+        case CLI_PARAM_GSM_REG_STATUS:
+            break;
+        case CLI_PARAM_SOS_BUTTON_INPUT_STATUS:
+            break;
+        case CLI_PARAM_FUNC_BUTTON_INPUT_STATUS:
+            break;
+        case CLI_PARAM_IGN_INPUT_STATUS:
+            break;
+        case CLI_PARAM_ECALL_MODE_PIN_OUPUT_STATUS:
+            break;
+        case CLI_PARAM_GARAGE_MODE_PIN_OUTPUT_STATUS:
+            break;
+        case CLI_PARAM_SOS_INDICATOR_OUTPUT_STATUS:
+            break;
+        case CLI_PARAM_ECALL_EMERGENCY_DEBUG:
+            break;
+        case CLI_PARAM_ECALL_EMERGENCY_DEBUG_NUMBER:
+            break;
+        case CLI_PARAM_DEBUG_OUTPUT_ECALL:
+            break;
+        case CLI_PARAM_ECALL_ON:
+            break;
+        case CLI_PARAM_ECALL_SPEAKER_VOLUME:
+            break;
+        case CLI_PARAM_ECALL_MICROPHONE_LEVEL:
+            break;
+        case CLI_PARAM_FOTA_STATUS:
+            break;
+        case CLI_PARAM_CRASH_TURNOVER_THRESHOLD:
+            break;
+        case CLI_PARAM_CRASH_TURNOVER_DURATION:
+            break;
+        case CLI_PARAM_MOUNT_TYPE:
+            break;
+        case CLI_PARAM_CRASH_INPUT_PIN:
+            break;
+        case CLI_PARAM_NUMBER_TROUBLE_CODE:
+            break;
+        case CLI_PARAM_SIGNAL_STRENGTH:
+            break;
+        case CLI_PARAM_SUPPLY_VOLTAGE:
+            break;
+        case CLI_PARAM_BOOT_VERSION:
+            break;
+        case CLI_PARAM_CLAIBRATION_NUMBER:
+            break;
+        case CLI_PARAM_MODULE_NUMBER:
+            break;
+        case CLI_PARAM_STRATEGY_NUMBER:
+            break;
+        case CLI_PARAM_HARDWARE_NUMBER:
+            break;
+        case CLI_PARAM_MODEM_SOFTWARE_NUMBER:
+            break;
+        case CLI_PARAM_IMU_SOFTWARE_NUMBER:
+            break;
+        case CLI_PARAM_MSD_NUMBER:
+            break;
+        case CLI_PARAM_LAST_MSD:
+            break;
+        case CLI_PARAM_CURRENT_GNSS_LAT:
+            break;
+        case CLI_PARAM_CURRENT_GNSS_LONG:
+            break;
+        case CLI_PARAM_CURRENT_GNSS_TIME:
+            break;
+        default:
+            break;
+    }
+
+    cli_cmd_response.resp_status = CLI_RESP_STATUS_OK;
+
     xQueueSend(CLI_cmd_response_queue, &cli_cmd_response, portMAX_DELAY);
 };
