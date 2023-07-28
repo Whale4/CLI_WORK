@@ -465,6 +465,7 @@ int CLI_get_value(char *data, CLI_cmd_t * CLI_cmd);
 float f_CLI_PARAM_ASI15_TRESHOLD = 0.7f;
 char* test_string = "112";
 char test_string_holder[20] = {0};
+bool test_bool_val = false;
 //--------------------------------------
 
 
@@ -836,7 +837,8 @@ void cli_service_read(CLI_cmd_param cmd_param, CLI_param_type type) {
         case CLI_PARAM_INT_MEM_TRANSMIT_ATTEMPTS:
             break;
         case CLI_PARAM_CRASH_SIGNAL_INTERNAL:
-            cli_cmd_response.str_Param_value = BOOL_names[1];
+            int bool_val = test_bool_val?1:0;
+            cli_cmd_response.str_Param_value = BOOL_names[bool_val];
             break;
         case CLI_PARAM_CRASH_SIGNAL_EXTERNAL:
             break;
@@ -1006,6 +1008,7 @@ int CLI_get_value(char *data, CLI_cmd_t * CLI_cmd){
         case CLI_PARAM_TYPE_INT:
             break;
         case CLI_PARAM_TYPE_FLOAT:
+            //FLOAT VALIDATION
             if(0 == float_validation(start_position, &CLI_cmd->f_Param_value)){
                 return 0;
             } else {
@@ -1013,6 +1016,7 @@ int CLI_get_value(char *data, CLI_cmd_t * CLI_cmd){
             }
             break;
         case CLI_PARAM_TYPE_STRING:
+            //STRING VALIDATION
             if(sizeof(CLI_cmd->string_holder)/sizeof(char)<strlen(start_position)){
                 return 1;
             } else {
@@ -1021,6 +1025,13 @@ int CLI_get_value(char *data, CLI_cmd_t * CLI_cmd){
             }
             break;
         case CLI_PARAM_TYPE_BOOL:
+            for(int i=0; i<2;i++){
+                if (strstr(start_position, BOOL_names[i]) != NULL) {    
+                    CLI_cmd->int_Param_value = i;
+                    return 0;
+                }
+            }
+            return 1;
             break;
         default:
             break;
@@ -1062,6 +1073,8 @@ void cli_service_write(CLI_cmd_t * CLI_cmd) {
         case CLI_PARAM_INT_MEM_TRANSMIT_ATTEMPTS:
             break;
         case CLI_PARAM_CRASH_SIGNAL_INTERNAL:
+            test_bool_val = CLI_cmd->int_Param_value;
+            cli_cmd_response.str_Param_value = BOOL_names[CLI_cmd->int_Param_value];
             break;
         case CLI_PARAM_CRASH_SIGNAL_EXTERNAL:
             break;
