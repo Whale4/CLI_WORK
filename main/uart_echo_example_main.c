@@ -58,6 +58,10 @@ static const char *const BOOL_names[] = {
     "TRUE"
 };
 
+static const char *const STATES_enum_names[] = {             
+    "ENABLED",
+    "DISABLED"
+};
 /*
 static const char *const GNSS_enum_names[] = {             
     "NO_FIX",
@@ -76,11 +80,6 @@ static const char *const GSM_enum_names[] = {
 static const char *const STATUS_enum_names[] = {             
     "ACTIVE",
     "INACTIVE"
-};
-
-static const char *const STATES_enum_names[] = {             
-    "ENABLED",
-    "DISABLED"
 };
 
 static const char *const FOTA_enum_names[] = {             
@@ -466,6 +465,7 @@ float f_CLI_PARAM_ASI15_TRESHOLD = 0.7f;
 char* test_string = "112";
 char test_string_holder[20] = {0};
 bool test_bool_val = false;
+int test_enum = 0;
 //--------------------------------------
 
 
@@ -916,6 +916,7 @@ void cli_service_read(CLI_cmd_param cmd_param, CLI_param_type type) {
         case CLI_PARAM_SOS_INDICATOR_OUTPUT_STATUS:
             break;
         case CLI_PARAM_ECALL_EMERGENCY_DEBUG:
+            cli_cmd_response.str_Param_value = STATES_enum_names[test_enum];
             break;
         case CLI_PARAM_ECALL_EMERGENCY_DEBUG_NUMBER:
             break;
@@ -1004,6 +1005,14 @@ int CLI_get_value(char *data, CLI_cmd_t * CLI_cmd){
     //VALUE PARSING
     switch(CLI_cmd->type){
         case CLI_PARAM_TYPE_ENUM:
+            //STRING VALIDATION
+            if(sizeof(CLI_cmd->string_holder)/sizeof(char)<strlen(start_position)){
+                return 1;
+            } else {
+                sprintf(CLI_cmd->string_holder,"%s",start_position);
+                return 0;
+            }
+            break;
             break;
         case CLI_PARAM_TYPE_INT:
             break;
@@ -1025,6 +1034,7 @@ int CLI_get_value(char *data, CLI_cmd_t * CLI_cmd){
             }
             break;
         case CLI_PARAM_TYPE_BOOL:
+            //BOOL VALIDATION
             for(int i=0; i<2;i++){
                 if (strstr(start_position, BOOL_names[i]) != NULL) {    
                     CLI_cmd->int_Param_value = i;
@@ -1048,6 +1058,7 @@ void cli_service_write(CLI_cmd_t * CLI_cmd) {
     cli_cmd_response.service = CLI_SERVICE_WRITE;
     cli_cmd_response.cmd_param = CLI_cmd->cmd_param;
     cli_cmd_response.type = CLI_cmd->type;
+    cli_cmd_response.resp_err = CLI_RESP_ERR_UNKNOWN_ERROR;
 
     switch (CLI_cmd->cmd_param){
         case CLI_PARAM_RADIO_MUTE_DELAY:
@@ -1153,6 +1164,17 @@ void cli_service_write(CLI_cmd_t * CLI_cmd) {
         case CLI_PARAM_SOS_INDICATOR_OUTPUT_STATUS:
             break;
         case CLI_PARAM_ECALL_EMERGENCY_DEBUG:
+            cli_cmd_response.resp_status = CLI_RESP_STATUS_NOK;
+            cli_cmd_response.resp_err = CLI_RESP_ERR_VALUE_FORMAT_NOT_VALID;
+            for(int i=0;i<2;i++){
+                if (strstr(CLI_cmd->string_holder, STATES_enum_names[i]) != NULL) {    
+                    test_enum = i;
+                    cli_cmd_response.str_Param_value = STATES_enum_names[i];
+                    cli_cmd_response.resp_status = CLI_RESP_STATUS_OK;
+                    break;
+                }
+            }
+            goto exit;
             break;
         case CLI_PARAM_ECALL_EMERGENCY_DEBUG_NUMBER:
             break;
@@ -1207,8 +1229,8 @@ void cli_service_write(CLI_cmd_t * CLI_cmd) {
         default:
             break;
     }
-
     cli_cmd_response.resp_status = CLI_RESP_STATUS_OK;
 
+exit:
     xQueueSend(CLI_cmd_response_queue, &cli_cmd_response, portMAX_DELAY);
 };
