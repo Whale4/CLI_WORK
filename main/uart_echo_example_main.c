@@ -431,6 +431,7 @@ typedef struct {
     CLI_param_type type;
     int int_Param_value;
     char* str_Param_value;
+    char string_holder[20];
     float f_Param_value;
 }CLI_cmd_t;
 
@@ -463,7 +464,7 @@ int CLI_get_value(char *data, CLI_cmd_t * CLI_cmd);
 //TESTING VALUES------------------------
 float f_CLI_PARAM_ASI15_TRESHOLD = 0.7f;
 char* test_string = "112";
-
+char test_string_holder[20] = {0};
 //--------------------------------------
 
 
@@ -487,7 +488,6 @@ void CLI_cmd_listener_task(){
         if (len) {
             data[len] = '\0';
             if(data[len-1]!=0x0A){
-                printf("REALLY???\r\n");
                 BAD_INPUT = true;
                 cli_cmd_response.service = CLI_SERVICE_NULL;
                 cli_cmd_response.resp_err = CLI_RESP_ERR_COMMAND_INCORRECT;
@@ -557,11 +557,11 @@ void CLI_cmd_listener_task(){
                                     if (strstr((char *) data, CLI_cmd_param_names[j]) != NULL) {
                                         cli_cmd.cmd_param = j;
                                         cli_cmd.type = CLI_param_value_type[j];
-
+                                        
+                                        //VALIDATE INPUT VALUES HERE. OK ? GO TO COMMAND EXECUTION : BAD RESPONSE
                                         if(0==CLI_get_value((char *) data, &cli_cmd)){
                                             goto exit;
                                         } else {
-                                            printf("HI_i'm here\r\n");
                                             BAD_INPUT = true;
                                             cli_cmd_response.service = cli_cmd.service;
                                             cli_cmd_response.resp_status = CLI_RESP_STATUS_NOK;
@@ -826,7 +826,7 @@ void cli_service_read(CLI_cmd_param cmd_param, CLI_param_type type) {
         case CLI_PARAM_GARAGE_MODE_END_DISTANCE:
             break;
         case CLI_PARAM_ECALL_TEST_NUMBER:
-            cli_cmd_response.str_Param_value = test_string;
+            cli_cmd_response.str_Param_value = test_string_holder;
             break;
         case CLI_PARAM_GARAGE_MODE_PIN:
             cli_cmd_response.str_Param_value = PIN_enum_names[1];
@@ -1013,6 +1013,12 @@ int CLI_get_value(char *data, CLI_cmd_t * CLI_cmd){
             }
             break;
         case CLI_PARAM_TYPE_STRING:
+            if(sizeof(CLI_cmd->string_holder)/sizeof(char)<strlen(start_position)){
+                return 1;
+            } else {
+                sprintf(CLI_cmd->string_holder,"%s",start_position);
+                return 0;
+            }
             break;
         case CLI_PARAM_TYPE_BOOL:
             break;
@@ -1046,6 +1052,8 @@ void cli_service_write(CLI_cmd_t * CLI_cmd) {
         case CLI_PARAM_GARAGE_MODE_END_DISTANCE:
             break;
         case CLI_PARAM_ECALL_TEST_NUMBER:
+            sprintf(test_string_holder,"%s",CLI_cmd->string_holder);
+            cli_cmd_response.str_Param_value = test_string_holder;
             break;
         case CLI_PARAM_GARAGE_MODE_PIN:
             break;
